@@ -6,7 +6,7 @@ import { getItems, createItem, updateItem, deleteItem } from "../services/api";
 
 export default function HomeScreen({ route, navigation }) {
     console.log("Parâmetros da rota:", route.params);
-    
+
     // Verificação segura do token
     const token = route.params?.token;
     const [items, setItems] = useState([]);
@@ -26,7 +26,7 @@ export default function HomeScreen({ route, navigation }) {
     useEffect(() => {
         const fetchItems = async () => {
             if (!token) return;
-            
+
             setLoading(true);
             try {
                 console.log("Buscando itens com token:", token);
@@ -48,7 +48,7 @@ export default function HomeScreen({ route, navigation }) {
             Alert.alert("Atenção", "O nome do item não pode ser vazio.");
             return;
         }
-        
+
         setLoading(true);
         try {
             const newItem = await createItem(newItemName.trim(), token);
@@ -68,7 +68,7 @@ export default function HomeScreen({ route, navigation }) {
             Alert.alert("Atenção", "O nome do item não pode ser vazio.");
             return;
         }
-        
+
         setLoading(true);
         try {
             const updatedItem = await updateItem(editingItem.id, newItemName.trim(), token);
@@ -86,29 +86,31 @@ export default function HomeScreen({ route, navigation }) {
         }
     }, [editingItem, newItemName, token]);
 
-    const handleDeleteItem = useCallback(async (id) => {
-        Alert.alert(
-            "Confirmar",
-            "Tem certeza que deseja excluir este item?",
-            [
+    const handleDeleteItem = useCallback(
+        async (id) => {
+            console.log("🗑️ Tentando excluir item com ID:", id);
+
+            Alert.alert("Confirmar", "Tem certeza que deseja excluir este item?", [
                 { text: "Cancelar", style: "cancel" },
-                { 
-                    text: "Excluir", 
+                {
+                    text: "Excluir",
                     style: "destructive",
                     onPress: async () => {
                         try {
                             await deleteItem(id, token);
+                            console.log("✅ Item excluído no backend!");
                             setItems((prev) => prev.filter((item) => item.id !== id));
                             Alert.alert("Sucesso", "Item excluído com sucesso!");
                         } catch (error) {
-                            console.error("Erro ao excluir item:", error);
+                            console.error(" Erro ao excluir item:", error);
                             Alert.alert("Erro", "Não foi possível excluir o item.");
                         }
-                    }
-                }
-            ]
-        );
-    }, [token]);
+                    },
+                },
+            ]);
+        },
+        [token]
+    );
 
     const handleEditItem = (item) => {
         setEditingItem(item);
@@ -121,8 +123,8 @@ export default function HomeScreen({ route, navigation }) {
             "Deseja realmente sair?",
             [
                 { text: "Cancelar", style: "cancel" },
-                { 
-                    text: "Sair", 
+                {
+                    text: "Sair",
                     style: "destructive",
                     onPress: () => navigation.navigate("Login")
                 }
@@ -141,16 +143,16 @@ export default function HomeScreen({ route, navigation }) {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Lista de Itens</Text>
-            
+
             {loading && <ActivityIndicator size="large" color="#6200EE" />}
-            
-            <ItemList 
-                items={items} 
-                onEdit={handleEditItem} 
-                onDelete={handleDeleteItem} 
+
+            <ItemList
+                items={items}
+                onEdit={handleEditItem}
+                onDelete={handleDeleteItem}
                 loading={loading}
             />
-            
+
             <TextInput
                 style={styles.input}
                 placeholder={editingItem ? "Editar nome do item" : "Nome do novo item"}
@@ -158,7 +160,7 @@ export default function HomeScreen({ route, navigation }) {
                 onChangeText={setNewItemName}
                 editable={!loading}
             />
-            
+
             <TouchableOpacity
                 style={[styles.button, loading && styles.buttonDisabled]}
                 onPress={editingItem ? handleUpdateItem : handleCreateItem}
@@ -168,7 +170,7 @@ export default function HomeScreen({ route, navigation }) {
                     {editingItem ? "Atualizar Item" : "Criar Item"}
                 </Text>
             </TouchableOpacity>
-            
+
             {editingItem && (
                 <TouchableOpacity
                     style={[styles.button, styles.cancelButton]}
@@ -181,7 +183,7 @@ export default function HomeScreen({ route, navigation }) {
                     <Text style={styles.buttonText}>Cancelar Edição</Text>
                 </TouchableOpacity>
             )}
-            
+
             <TouchableOpacity
                 style={[styles.button, styles.logoutButton]}
                 onPress={handleLogout}
